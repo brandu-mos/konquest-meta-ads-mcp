@@ -1,0 +1,88 @@
+# Meta Ads MCP - Placement Default Configuration
+#
+# Maps creative aspect ratios to default Meta placement groups.
+# Overridable per-campaign by the operator.
+
+placement_mapping:
+  "9x16":
+    placements:
+      - STORY
+      - REELS
+      - INSTREAM_VIDEO
+    description: "Vertical-first placements (Stories, Reels)"
+    publisher_platforms:
+      - facebook
+      - instagram
+    positions:
+      facebook:
+        - story
+        - reels
+      instagram:
+        - story
+        - reels
+
+  "1x1":
+    placements:
+      - FEED
+      - SEARCH
+      - MARKETPLACE
+    description: "Square placements (Feed, Search)"
+    publisher_platforms:
+      - facebook
+      - instagram
+    positions:
+      facebook:
+        - feed
+        - marketplace
+        - search
+      instagram:
+        - stream
+        - explore
+
+  "4x5":
+    placements:
+      - FEED
+    description: "Tall feed placement (preferred for Facebook Feed)"
+    publisher_platforms:
+      - facebook
+      - instagram
+    positions:
+      facebook:
+        - feed
+      instagram:
+        - stream
+
+  "16x9":
+    placements:
+      - INSTREAM_VIDEO
+      - AUDIENCE_NETWORK
+    description: "Landscape placements (in-stream video, Audience Network)"
+    publisher_platforms:
+      - facebook
+      - audience_network
+    positions:
+      facebook:
+        - instream_video
+      audience_network:
+        - classic
+
+# Placement group translation (human-readable -> Meta API spec)
+placement_groups:
+  FEED:
+    facebook_positions: [feed, marketplace, search]
+    instagram_positions: [stream, explore]
+  STORY:
+    facebook_positions: [story]
+    instagram_positions: [story]
+  REELS:
+    facebook_positions: [reels]
+    instagram_positions: [reels]
+  INSTREAM_VIDEO:
+    facebook_positions: [instream_video]
+  SEARCH:
+    facebook_positions: [search]
+    instagram_positions: [explore]
+  MESSENGER:
+    messenger_positions: [messenger_home, story]
+  AUDIENCE_NETWORK:
+    audience_network_positions: [classic, rewarded_video]

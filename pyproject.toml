@@ -1,0 +1,29 @@
+[project]
+name = "konquest-meta-ads-mcp"
+version = "2.0.0"
+description = "KonQuest Meta Ads MCP - Supervised Meta Ads Operating System for Claude Code"
+requires-python = ">=3.11"
+dependencies = [
+    "facebook-business>=22.0.0",
+    "mcp[cli]>=1.6.0",
+    "httpx>=0.28.1",
+    "pyyaml>=6.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["meta_ads_mcp*"]
+
+[tool.mcp]
+name = "io.github.konquest/meta-ads-mcp"

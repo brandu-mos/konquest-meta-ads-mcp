@@ -1,0 +1,132 @@
+clients:
+  example-brand:
+    account_id: act_1234567890
+    account_name: Example Brand
+    managed_status: active_client
+    archetype: hybrid
+    page_id: '123456789012345'
+    instagram_user_id: '17841400000000000'
+    pixel_id: '654321098765432'
+    catalog_id: null
+    currency: EUR
+    timezone: Europe/Athens
+    reporting_language: el
+    reporting_channel: whatsapp
+    business_name: Example Brand Ltd
+    business_city: Athens
+    lifetime_spend: 0
+    created: '2026-01-01'
+    readiness:
+      launch_readiness: ready
+      blockers: []
+      warnings: []
+    ig_resolution:
+      status: api_confirmed
+      last_verified_at: '2026-01-01'
+      method: api_discovered
+    verification_sources:
+      account_id: api_discovered
+      page_id: api_discovered
+      pixel_id: api_discovered
+      instagram_user_id: api_confirmed
+    pixel_status:
+      health: healthy
+      last_fired: '2026-01-01'
+      events:
+      - PageView
+      - Purchase
+    campaign_state:
+      active: 0
+      paused: 0
+      total: 0
+      last_7d_spend_eur: 0
+    notes: Example account - replace with your real accounts
+    instagram_username: example_brand
+  demo-ecommerce:
+    account_id: act_9876543210
+    account_name: Demo E-commerce Store
+    managed_status: active_client
+    archetype: ecommerce
+    page_id: '987654321098765'
+    instagram_user_id: '17841400000000001'
+    pixel_id: '123456789012345'
+    catalog_id: '111222333444555'
+    currency: EUR
+    timezone: Europe/Athens
+    reporting_language: el
+    reporting_channel: whatsapp
+    business_name: Demo Store Ltd
+    business_city: Thessaloniki
+    lifetime_spend: 0
+    created: '2026-01-01'
+    readiness:
+      launch_readiness: ready
+      blockers: []
+      warnings: []
+    ig_resolution:
+      status: api_confirmed
+      last_verified_at: '2026-01-01'
+      method: api_discovered
+    verification_sources:
+      account_id: api_discovered
+      page_id: api_discovered
+      pixel_id: api_discovered
+      instagram_user_id: api_confirmed
+      catalog_id: manual
+    pixel_status:
+      health: healthy
+      last_fired: '2026-01-01'
+      events:
+      - PageView
+      - ViewContent
+      - AddToCart
+      - Purchase
+    campaign_state:
+      active: 0
+      paused: 0
+      total: 0
+      last_7d_spend_eur: 0
+    notes: E-commerce example with catalog - replace with your real accounts
+    instagram_username: demo_store
+  demo-leadgen:
+    account_id: act_5555555555
+    account_name: Demo Lead Gen Business
+    managed_status: active_client
+    archetype: lead_gen
+    page_id: '555666777888999'
+    instagram_user_id: '17841400000000002'
+    pixel_id: '999888777666555'
+    catalog_id: null
+    currency: EUR
+    timezone: Europe/Athens
+    reporting_language: el
+    reporting_channel: whatsapp
+    business_name: Demo Consulting
+    business_city: Heraklion
+    lifetime_spend: 0
+    created: '2026-01-01'
+    readiness:
+      launch_readiness: partial
+      blockers: []
+      warnings:
+      - Example warning - pixel not yet verified
+    ig_resolution:
+      status: unresolved
+      last_verified_at: '2026-01-01'
+      method: api_discovered
+    verification_sources:
+      account_id: api_discovered
+      page_id: api_discovered
+      pixel_id: api_discovered
+      instagram_user_id: unresolved
+    pixel_status:
+      health: degraded
+      last_fired: null
+      events: []
+    campaign_state:
+      active: 0
+      paused: 0
+      total: 0
+      last_7d_spend_eur: 0
+    notes: Lead gen example - replace with your real accounts
+    instagram_username: demo_consulting
