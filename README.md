@@ -28,7 +28,7 @@ KonQuest Meta Ads MCP uses an open-core model:
 - Vault bootstrap (15 template files per client)
 - Premium tests and evaluations
 
-Premium bundle available separately. Public tools work fully without it.
+**[Get the Premium Bundle (€149 launch price)](https://farasokster.gumroad.com/l/konquest-meta-ads-mcp-premium)** - one-time purchase, perpetual license. Public tools work fully without it.
 
 ## What Makes This Different
 
@@ -188,6 +188,18 @@ your-vault/
 uv run --extra dev python -m pytest tests/ -v
 # Public: 181 passed | Premium (full): 246 passed
 ```
+
+## Premium Bundle
+
+The premium bundle adds 41 tools on top of the 57 public tools:
+
+- **Advisory Optimization Engine** (31 tools) - optimization cycles, review queues, experiment management, budget governor, creative rotation, learning engine, operator digests. Everything is advisory - you approve all actions.
+- **Vault Intelligence + Copy Generation** (4 tools) - reads client brand voice, ICP personas, messaging angles from local vault files. Generates ad copy grounded in client intelligence.
+- **Automation Suite** (6 tools) - Greek language QA, full account diagnostics, bulk ad copy fix, product extensions, multi-account audit.
+
+One-time purchase. Perpetual license. 246 tests.
+
+**[Get the Premium Bundle (€149 launch price)](https://farasokster.gumroad.com/l/konquest-meta-ads-mcp-premium)**
 
 ## License
 
