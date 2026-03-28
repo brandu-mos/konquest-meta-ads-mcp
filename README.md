@@ -4,6 +4,10 @@
 
 Supervised Meta Ads Operating System for Claude Code.
 
+```bash
+pip install konquest-meta-ads-mcp
+```
+
 ## Open-Core Model
 
 KonQuest Meta Ads MCP uses an open-core model:
