@@ -14,7 +14,7 @@ from typing import Optional
 
 from meta_ads_mcp.server import mcp
 from meta_ads_mcp.core.api import api_client, MetaAPIError
-from meta_ads_mcp.core.utils import ensure_account_id_format, format_budget_cents_to_currency
+from meta_ads_mcp.core.utils import ensure_account_id_format, format_budget_cents_to_currency, currency_to_cents
 
 logger = logging.getLogger("meta-ads-mcp.campaigns")
 
