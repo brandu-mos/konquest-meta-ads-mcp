@@ -115,14 +115,6 @@ meta_ads_mcp/
 - **Structure validator** - campaign structure consistency checks
 - **Operational validator** - budget, schedule, and targeting sanity checks
 
-## Non-Shipped Code
-
-Code that exists in the repository but is NOT part of the active tool surface:
-
-- **reporting/templates.py, reporting/formatter.py** - not imported at runtime, no active report generation
-- **evals/** - internal evaluation stubs, not operator-facing
-- **Internal helpers** (not MCP tools): identity.py (IG resolution), api.py (HTTP client), auth.py (token verification), utils.py (format helpers), safety/ (rate limiter, rollback, dedup), validators/ (pre-write validation pipeline)
-
 ## Setup
 
 ### 1. Install
