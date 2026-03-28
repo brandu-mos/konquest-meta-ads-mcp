@@ -126,6 +126,12 @@ Code that exists in the repository but is NOT part of the active tool surface:
 ### 1. Install
 
 ```bash
+pip install konquest-meta-ads-mcp
+```
+
+Or from source:
+
+```bash
 cd meta-ads-mcp
 uv sync
 ```
@@ -204,3 +210,5 @@ One-time purchase. Perpetual license. 246 tests.
 ## License
 
 MIT - see [LICENSE](LICENSE).
+
+<!-- mcp-name: io.github.brandu-mos/konquest-meta-ads-mcp -->
