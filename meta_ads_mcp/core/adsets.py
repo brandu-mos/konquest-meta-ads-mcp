@@ -665,6 +665,16 @@ def create_adset(
     if end_time:
         api_payload["end_time"] = end_time
 
+    from meta_ads_mcp.safety.rate_limiter import enforce_rate_gate
+    rate_gate = enforce_rate_gate(account_id, "write")
+    if not rate_gate["allowed"]:
+        return {
+            "error": f"Rate limit gate BLOCKED: {rate_gate['block_reason']}",
+            "blocked_at": "rate_limit_gate",
+            "rate_state": rate_gate["state"],
+            "usage_pct": rate_gate["usage_pct"],
+        }
+
     try:
         result = api_client.graph_post(
             f"/{account_id}/adsets",
@@ -1048,6 +1058,16 @@ def update_adset(
         }
 
     # --- Step 5: API call - update ad set ---
+    from meta_ads_mcp.safety.rate_limiter import enforce_rate_gate
+    rate_gate = enforce_rate_gate(adset_id, "write")
+    if not rate_gate["allowed"]:
+        return {
+            "error": f"Rate limit gate BLOCKED: {rate_gate['block_reason']}",
+            "blocked_at": "rate_limit_gate",
+            "rate_state": rate_gate["state"],
+            "usage_pct": rate_gate["usage_pct"],
+        }
+
     try:
         result = api_client.graph_post(
             f"/{adset_id}",

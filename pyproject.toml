@@ -3,20 +3,6 @@ name = "konquest-meta-ads-mcp"
 version = "2.0.0"
 description = "KonQuest Meta Ads MCP - Supervised Meta Ads Operating System for Claude Code"
 requires-python = ">=3.11"
-license = {text = "MIT"}
-authors = [
-    {name = "Konstantinos Farasopoulos", email = "farasok@gmail.com"},
-]
-keywords = ["mcp", "meta-ads", "facebook-ads", "claude-code", "marketing"]
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Office/Business",
-]
-readme = "README.md"
 dependencies = [
     "facebook-business>=22.0.0",
     "mcp[cli]>=1.6.0",
@@ -24,11 +10,6 @@ dependencies = [
     "pyyaml>=6.0",
     "pydantic>=2.0.0",
 ]
-
-[project.urls]
-Homepage = "https://github.com/brandu-mos/konquest-meta-ads-mcp"
-Repository = "https://github.com/brandu-mos/konquest-meta-ads-mcp"
-Issues = "https://github.com/brandu-mos/konquest-meta-ads-mcp/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -45,4 +26,4 @@ where = ["."]
 include = ["meta_ads_mcp*"]
 
 [tool.mcp]
-name = "io.github.brandu-mos/konquest-meta-ads-mcp"
+name = "io.github.konquest/meta-ads-mcp"

@@ -211,12 +211,10 @@ else:
 
 
 def main():
-    """Run the MCP server. Defaults to stdio; set MCP_TRANSPORT=sse for HTTP/SSE mode."""
-    import os
-    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+    """Run the MCP server via stdio transport."""
     mode = "premium (98 tools)" if PREMIUM_AVAILABLE else "open-core (55 tools)"
-    logger.info("Starting KonQuest Meta Ads MCP server v%s [%s] transport=%s", "2.0.0", mode, transport)
-    mcp.run(transport=transport)
+    logger.info("Starting KonQuest Meta Ads MCP server v%s [%s]", "2.0.0", mode)
+    mcp.run(transport="stdio")
 
 
 if __name__ == "__main__":

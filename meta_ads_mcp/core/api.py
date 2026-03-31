@@ -3,15 +3,17 @@ Core API layer for Meta Graph API access.
 
 Provides both facebook-business SDK access and raw HTTP fallback
 for endpoints the SDK doesn't cover. Handles rate limit monitoring,
-error classification, and appsecret_proof generation.
+error classification, appsecret_proof generation, and rate-limit-aware
+retry with exponential backoff.
 
-Graph API version: v24.0
+Graph API version: v25.0
 """
 import hashlib
 import hmac
 import json
 import logging
 import os
+import random
 import time
 from typing import Any, Optional
 
@@ -22,12 +24,23 @@ from facebook_business.exceptions import FacebookRequestError
 
 logger = logging.getLogger("meta-ads-mcp.api")
 
-GRAPH_API_VERSION = "v24.0"
+GRAPH_API_VERSION = "v25.0"
 GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
 # Rate limit thresholds
 RATE_LIMIT_WARN_PCT = 80
 RATE_LIMIT_BLOCK_PCT = 95
+
+# Error codes where retrying after backoff is appropriate (throttle / rate limit)
+RETRYABLE_ERROR_CODES = frozenset({4, 17, 32, 613, 80000, 80001, 80002, 80003, 80004})
+
+# Minimum delay between write (POST) requests - keeps us safely under 100 QPS hard cap
+WRITE_THROTTLE_DELAY = 0.1  # seconds
+
+# Exponential backoff parameters
+BACKOFF_BASE_SECONDS = 2.0
+BACKOFF_MAX_SECONDS = 300.0  # matches Development tier block duration
+BACKOFF_MAX_RETRIES = 5
 
 
 class MetaAPIError(Exception):
@@ -70,7 +83,12 @@ class RateLimitStatus:
 
     @property
     def max_usage_pct(self) -> float:
-        """Return the highest usage percentage across all rate limit categories."""
+        """Return the highest usage percentage across all rate limit categories.
+
+        Includes app-level, ad-account-level, AND Business Use Case (BUC) usage.
+        BUC limits (x-business-use-case-usage) are the first to hit in practice
+        for the Marketing API, so they must be included.
+        """
         max_pct = 0.0
         for usage in [self.app_usage, self.ad_account_usage]:
             if isinstance(usage, dict):
@@ -78,7 +96,35 @@ class RateLimitStatus:
                     val = usage.get(key, 0)
                     if isinstance(val, (int, float)) and val > max_pct:
                         max_pct = val
+        # BUC: dict keyed by business_id, each value is a list of BUC type objects
+        if isinstance(self.business_usage, dict):
+            for buc_list in self.business_usage.values():
+                if isinstance(buc_list, list):
+                    for buc in buc_list:
+                        if isinstance(buc, dict):
+                            for key in ("call_count", "total_cputime", "total_time"):
+                                val = buc.get(key, 0)
+                                if isinstance(val, (int, float)) and val > max_pct:
+                                    max_pct = val
         return max_pct
+
+    @property
+    def estimated_time_to_regain_access_minutes(self) -> int:
+        """Return the max estimated_time_to_regain_access (minutes) across all BUC entries.
+
+        When > 0, callers should wait this many minutes before retrying - do NOT
+        use exponential backoff in this case, Meta's value is authoritative.
+        """
+        max_wait = 0
+        if isinstance(self.business_usage, dict):
+            for buc_list in self.business_usage.values():
+                if isinstance(buc_list, list):
+                    for buc in buc_list:
+                        if isinstance(buc, dict):
+                            wait = buc.get("estimated_time_to_regain_access", 0)
+                            if isinstance(wait, (int, float)) and int(wait) > max_wait:
+                                max_wait = int(wait)
+        return max_wait
 
     @property
     def is_warning(self) -> bool:
@@ -176,52 +222,99 @@ class MetaAPIClient:
         Make a GET request to the Graph API via raw HTTP.
 
         Use this for endpoints not covered by the facebook-business SDK.
+        Retries on transient rate-limit errors with exponential backoff.
         """
         self._ensure_initialized()
         request_params = self._build_params(params)
         if fields:
             request_params["fields"] = ",".join(fields)
 
-        response = self._http_client.get(endpoint, params=request_params)
-        self.rate_limits.update_from_headers(dict(response.headers))
+        for attempt in range(BACKOFF_MAX_RETRIES + 1):
+            response = self._http_client.get(endpoint, params=request_params)
+            self.rate_limits.update_from_headers(dict(response.headers))
 
-        if self.rate_limits.is_warning:
-            logger.warning("Rate limit usage at %.1f%% - approaching limit", self.rate_limits.max_usage_pct)
+            if self.rate_limits.is_warning:
+                logger.warning("Rate limit usage at %.1f%% - approaching limit", self.rate_limits.max_usage_pct)
 
-        if response.status_code != 200:
-            self._handle_http_error(response)
+            if response.status_code == 200:
+                return response.json()
 
-        return response.json()
+            try:
+                self._handle_http_error(response)
+            except MetaAPIError as e:
+                if e.error_code not in RETRYABLE_ERROR_CODES or attempt == BACKOFF_MAX_RETRIES:
+                    raise
+                wait = self._backoff_wait(attempt)
+                logger.warning(
+                    "Retryable error %d (attempt %d/%d) on GET %s - waiting %.1fs",
+                    e.error_code, attempt + 1, BACKOFF_MAX_RETRIES, endpoint, wait,
+                )
+                time.sleep(wait)
+
+        raise MetaAPIError("Max retries exceeded", error_code=-1)  # unreachable
 
     def graph_post(self, endpoint: str, data: Optional[dict] = None,
                    params: Optional[dict] = None, json_body: Optional[dict] = None) -> dict:
         """
         Make a POST request to the Graph API via raw HTTP.
 
-        For write operations. Always uses JSON body for safe Greek text transport.
+        Enforces a minimum inter-request delay to stay safely under Meta's 100 QPS
+        hard cap. Retries on transient rate-limit errors with exponential backoff
+        (or Meta's own estimated_time_to_regain_access when set).
         """
         self._ensure_initialized()
         request_params = self._build_params(params)
 
-        if json_body:
-            # Safe path for Greek text - use JSON body
-            response = self._http_client.post(
-                endpoint,
-                params=request_params,
-                json=json_body,
-                headers={"Content-Type": "application/json; charset=utf-8"},
+        for attempt in range(BACKOFF_MAX_RETRIES + 1):
+            # Enforce minimum inter-write delay (keeps us under 100 QPS hard cap)
+            time.sleep(WRITE_THROTTLE_DELAY)
+
+            if json_body:
+                response = self._http_client.post(
+                    endpoint,
+                    params=request_params,
+                    json=json_body,
+                    headers={"Content-Type": "application/json; charset=utf-8"},
+                )
+            elif data:
+                response = self._http_client.post(endpoint, params=request_params, data=data)
+            else:
+                response = self._http_client.post(endpoint, params=request_params)
+
+            self.rate_limits.update_from_headers(dict(response.headers))
+
+            if response.status_code == 200:
+                return response.json()
+
+            try:
+                self._handle_http_error(response)
+            except MetaAPIError as e:
+                if e.error_code not in RETRYABLE_ERROR_CODES or attempt == BACKOFF_MAX_RETRIES:
+                    raise
+                wait = self._backoff_wait(attempt)
+                logger.warning(
+                    "Retryable error %d (attempt %d/%d) on POST %s - waiting %.1fs",
+                    e.error_code, attempt + 1, BACKOFF_MAX_RETRIES, endpoint, wait,
+                )
+                time.sleep(wait)
+
+        raise MetaAPIError("Max retries exceeded", error_code=-1)  # unreachable
+
+    def _backoff_wait(self, attempt: int) -> float:
+        """Calculate wait time for retry attempt.
+
+        Uses Meta's estimated_time_to_regain_access when available (authoritative).
+        Falls back to exponential backoff with jitter.
+        """
+        wait_minutes = self.rate_limits.estimated_time_to_regain_access_minutes
+        if wait_minutes > 0:
+            logger.warning(
+                "Meta BUC throttle: estimated_time_to_regain_access=%d min. Waiting as instructed.",
+                wait_minutes,
             )
-        elif data:
-            response = self._http_client.post(endpoint, params=request_params, data=data)
-        else:
-            response = self._http_client.post(endpoint, params=request_params)
-
-        self.rate_limits.update_from_headers(dict(response.headers))
-
-        if response.status_code != 200:
-            self._handle_http_error(response)
-
-        return response.json()
+            return float(wait_minutes * 60)
+        jitter = random.uniform(0, 1.0)
+        return min(BACKOFF_BASE_SECONDS * (2 ** attempt) + jitter, BACKOFF_MAX_SECONDS)
 
     def _handle_http_error(self, response: httpx.Response):
         """Parse and raise structured API error."""

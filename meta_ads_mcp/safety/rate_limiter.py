@@ -67,6 +67,8 @@ def get_rate_state(account_id: Optional[str] = None) -> dict:
         "usage_pct": round(pct, 1),
         "app_usage": rl.app_usage,
         "ad_account_usage": rl.ad_account_usage,
+        "business_usage": rl.business_usage,
+        "estimated_time_to_regain_access_minutes": rl.estimated_time_to_regain_access_minutes,
         "allow_writes": allow_writes,
         "allow_reads": True,  # reads always allowed
         "warning": warning,

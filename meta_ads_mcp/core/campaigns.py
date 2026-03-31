@@ -14,7 +14,7 @@ from typing import Optional
 
 from meta_ads_mcp.server import mcp
 from meta_ads_mcp.core.api import api_client, MetaAPIError
-from meta_ads_mcp.core.utils import ensure_account_id_format, format_budget_cents_to_currency, currency_to_cents
+from meta_ads_mcp.core.utils import ensure_account_id_format, format_budget_cents_to_currency
 
 logger = logging.getLogger("meta-ads-mcp.campaigns")
 
@@ -338,6 +338,17 @@ def create_campaign(
         "special_ad_categories": _json.dumps(sac_list),
         "is_adset_budget_sharing_enabled": "false",
     }
+
+    from meta_ads_mcp.safety.rate_limiter import enforce_rate_gate
+    rate_gate = enforce_rate_gate(account_id, "write")
+    if not rate_gate["allowed"]:
+        return {
+            "error": f"Rate limit gate BLOCKED: {rate_gate['block_reason']}",
+            "blocked_at": "rate_limit_gate",
+            "rate_state": rate_gate["state"],
+            "usage_pct": rate_gate["usage_pct"],
+        }
+
     try:
         result = api_client.graph_post(
             f"/{account_id}/campaigns",
@@ -631,6 +642,16 @@ def update_campaign(
         }
 
     # --- Step 4: API call - update campaign ---
+    from meta_ads_mcp.safety.rate_limiter import enforce_rate_gate
+    rate_gate = enforce_rate_gate(campaign_id, "write")
+    if not rate_gate["allowed"]:
+        return {
+            "error": f"Rate limit gate BLOCKED: {rate_gate['block_reason']}",
+            "blocked_at": "rate_limit_gate",
+            "rate_state": rate_gate["state"],
+            "usage_pct": rate_gate["usage_pct"],
+        }
+
     try:
         result = api_client.graph_post(
             f"/{campaign_id}",
