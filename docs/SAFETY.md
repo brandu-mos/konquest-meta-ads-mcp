@@ -33,6 +33,22 @@ Edit `config/thresholds.yaml` to adjust:
 - budget_increase_preview_pct (default: 15)
 - bulk_mutation_confirm_count (default: 5)
 
+## Rate Limit Protection
+
+All write operations are protected by a multi-layer rate limit system:
+
+### Layer 1: Pre-write gate
+`enforce_rate_gate()` runs before every campaign, ad set, and ad write. If usage is above 80% (critical) or 95% (blocked), the operation is rejected before touching the API.
+
+### Layer 2: Inter-request throttle
+Every `POST` to the Meta API includes a minimum 100ms delay. This keeps burst write rate safely under Meta's 100 QPS hard cap.
+
+### Layer 3: Retry with backoff
+Rate limit errors (codes 4, 17, 32, 613, 80000-80004) trigger automatic retry with exponential backoff (base 2s, max 5 retries, max wait 300s). When `estimated_time_to_regain_access` is set in the response, that value (in minutes) takes priority over the backoff formula.
+
+### What gets monitored
+All three rate limit headers are tracked: `x-app-usage`, `x-ad-account-usage`, and `x-business-use-case-usage`. BUC is the critical one for the Marketing API - it's what exhausts first in practice.
+
 ## Greek Text Safety
 All Greek text passes through validation before and after API writes.
 See `meta_ads_mcp/validators/greek_text.py` for the full pipeline.
