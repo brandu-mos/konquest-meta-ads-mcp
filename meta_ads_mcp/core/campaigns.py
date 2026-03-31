@@ -247,7 +247,7 @@ def create_campaign(
     sac_list: list[str] = []
     if special_ad_categories:
         sac_list = [s.strip().upper() for s in special_ad_categories.split(",") if s.strip()]
-        valid_sac = ["CREDIT", "EMPLOYMENT", "HOUSING", "ISSUES_ELECTIONS_POLITICS"]
+        valid_sac = ["FINANCIAL_PRODUCTS_SERVICES", "EMPLOYMENT", "HOUSING", "ISSUES_ELECTIONS_POLITICS"]
         for s in sac_list:
             if s not in valid_sac:
                 return {
@@ -531,7 +531,7 @@ def update_campaign(
     # --- Special ad categories validation ---
     sac_list = None
     if special_ad_categories is not None:
-        valid_sac = ["CREDIT", "EMPLOYMENT", "HOUSING", "ISSUES_ELECTIONS_POLITICS"]
+        valid_sac = ["FINANCIAL_PRODUCTS_SERVICES", "EMPLOYMENT", "HOUSING", "ISSUES_ELECTIONS_POLITICS"]
         if special_ad_categories.strip() == "":
             sac_list = []
         else:

@@ -44,7 +44,7 @@ PLACEMENT_GROUP_MAP = {
     },
     "MESSENGER": {
         "publisher_platforms": ["messenger"],
-        "messenger_positions": ["messenger_home", "story"],
+        "messenger_positions": ["story"],
     },
     "SEARCH": {
         "publisher_platforms": ["facebook", "instagram"],
