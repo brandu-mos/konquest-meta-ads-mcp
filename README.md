@@ -155,7 +155,7 @@ Add to your Claude Code MCP config (`.mcp.json`):
   "mcpServers": {
     "meta-ads": {
       "command": "uv",
-      "args": ["--directory", "/path/to/meta-ads-mcp", "run", "python", "-m", "meta_ads_mcp"],
+      "args": ["--directory", "/path/to/konquest-meta-ads-mcp", "run", "python", "-m", "meta_ads_mcp"],
       "env": {
         "META_ACCESS_TOKEN": "your_token_here",
         "VAULT_PATH": "/path/to/your/marketing-vault"
@@ -163,6 +163,16 @@ Add to your Claude Code MCP config (`.mcp.json`):
     }
   }
 }
+```
+
+Or, for OpenAI's codex add this to your ./codex/config.toml:
+```toml
+[mcp_servers.konquestmetaads]
+command = "uv"
+args = ["--directory", "/path/to/konquest-meta-ads-mcp", "run", "python", "-m", "meta_ads_mcp"]
+
+[mcp_servers.konquestmetaads.env]
+META_ACCESS_TOKEN = "your_token_here"
 ```
 
 ### 4. Vault Structure (Optional)
