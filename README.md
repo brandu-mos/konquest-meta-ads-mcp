@@ -1,7 +1,7 @@
 # KonQuest Meta Ads MCP
 
 Supervised Meta Ads Operating System for Claude Code.
-
+You can find the premium version here: https://farasokster.gumroad.com/l/konquest-meta-ads-mcp-premium
 ## Open-Core Model
 
 KonQuest Meta Ads MCP uses an open-core model:
