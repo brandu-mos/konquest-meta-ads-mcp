@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/brandu-mos-konquest-meta-ads-mcp-badge.png)](https://mseep.ai/app/brandu-mos-konquest-meta-ads-mcp)
+
 # KonQuest Meta Ads MCP
 
 Supervised Meta Ads Operating System for Claude Code.
